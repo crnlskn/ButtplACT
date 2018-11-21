@@ -1,0 +1,21 @@
+generally have baseline/ambient stimulation and impact stimulation
+
+also figure out an interesting curve for impact stim, some combination of
+intensity and length (and ramp up? technically feasible? probably...)
+
+role seperated behavior:
+   tanks: ambient is emnity? own hp?
+ 	  impact is hits?
+		cooldowns reduce ambient? 
+		increase ambient but reduce impact?
+
+  healer: ambient is tank&raid hp (weighted? how)
+	  impact is tank and raid hits
+		scale release from impact to ambient with how big the heals to 
+		get the tank up are? bigger = faster or bigger = slower?
+
+     dps: ambient is own dots? total raid dps?
+	  impact is attacks over a given threshold? 
+		might be interesting if that somehow scales with raid dps
+		e.g. bringing 2k to a raid that totals 4k makes notable big
+		hits scale even higher?
