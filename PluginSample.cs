@@ -216,7 +216,6 @@ namespace ButtplACT
             // Do I *need* to do async stuff here? lmao
             bpcl.ConnectAsync();
             this.vibeState = new VibeState();
-            DoAmbientVibrations().Start();
             lblStatus.Text = "Plugin Started";
         }
 
@@ -346,7 +345,6 @@ namespace ButtplACT
                 scanning = !scanning;
                 ScanButton.Text = "Scan for devices";
                 vibeState.Running = true;
-                DoAmbientVibrations().Start();
             }
             else
             {
