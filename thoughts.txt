@@ -4,18 +4,56 @@ also figure out an interesting curve for impact stim, some combination of
 intensity and length (and ramp up? technically feasible? probably...)
 
 role seperated behavior:
-   tanks: ambient is emnity? own hp?
- 	  impact is hits?
-		cooldowns reduce ambient? 
-		increase ambient but reduce impact?
+  tanks:  ambient is emnity? own hp?
+ 	        impact is hits?
+		      cooldowns reduce ambient? 
+		      increase ambient but reduce impact?
 
   healer: ambient is tank&raid hp (weighted? how)
-	  impact is tank and raid hits
-		scale release from impact to ambient with how big the heals to 
-		get the tank up are? bigger = faster or bigger = slower?
+	        impact is tank and raid hits
+		      scale release from impact to ambient with how big the heals to 
+		      get the tank up are? bigger = faster or bigger = slower?
 
-     dps: ambient is own dots? total raid dps?
-	  impact is attacks over a given threshold? 
-		might be interesting if that somehow scales with raid dps
-		e.g. bringing 2k to a raid that totals 4k makes notable big
-		hits scale even higher?
+  dps:    ambient is own dots? total raid dps?
+	        impact is attacks over a given threshold? 
+		      might be interesting if that somehow scales with raid dps
+		      e.g. bringing 2k to a raid that totals 4k makes notable big
+		      hits scale even higher?
+
+next actual feasible things:
+  different kinds of target, 
+    e.g. "damaged," "healed," "dps reference," "dps target number"
+  
+
+design interna:
+  ACT events are reacted upon depending on attacker, victim, swingtype and
+  so on
+
+  the notable events exposed by ACT are OnCombatStart, OnCombatEnd, and
+  AfterCombatAction, where for us OnCombatStart and OnCombatEnd are "start
+  changing state" and "stop changing state" events respectively
+
+  AfterCombatAction reports every single action that happens during combat,
+  such as auto-attacks, spells, and abilities. notably this includes targeted
+  as well as untargeted skills, i.e. the paladin buff "Fight or Flight" triggers
+  a CombatActionEvent with attacker and victim both being the pld and attack
+  type of "Fight or Flight" and all those other details
+
+  this allows us to give users a surprising degree of control over which kinds
+  of events produce which kinds of reaction. the first iteration will likely
+  be a config file of some kind, although a GUI should be feasible
+
+  a given AfterCombatActionEvent will be inspected with regards to whether it
+  necessitates a response - i.e. a lookup in a data object which holds
+  combinations of the necessary actions and involved participants - and the
+  configured response will be prepared and added to an event queue (impl
+  details need too include some kind of conflict resolution here, given that
+  it is easily possible to design conflicting triggers, although maybe this
+  can be left to the user), which will be handed to the Buttplug client
+  asynchronously
+
+
+  - userconf events can be absolute or relative, and constant or progressive
+      e.g. "when rampart, increase vibration *by* 10%" or "when hallowed
+      ground, don't vibrate at all," or "when fight or flight, vibrate at 20%
+      for 15 seconds then increase to 60% over the rest of the buff duration"
