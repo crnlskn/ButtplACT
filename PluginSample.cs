@@ -3,6 +3,7 @@ using Buttplug.Client;
 using Buttplug.Core;
 using Buttplug.Core.Messages;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,6 +24,7 @@ namespace ButtplACT
 {
     public class PluginSample : UserControl, IActPluginV1
     {
+
         #region Designer Created Code (Avoid editing)
         /// <summary> 
         /// Required designer variable.
@@ -51,39 +53,43 @@ namespace ButtplACT
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this.targetTextBox = new System.Windows.Forms.TextBox();
+            this.IncomingTargetTextBox = new System.Windows.Forms.TextBox();
             this.ScanButton = new System.Windows.Forms.Button();
             this.deviceListBox = new System.Windows.Forms.CheckedListBox();
             this.label2 = new System.Windows.Forms.Label();
             this.baseIntensityTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.ImpactIntensityTextBox = new System.Windows.Forms.TextBox();
+            this.IncomingImpactIntensityTextBox = new System.Windows.Forms.TextBox();
             this.button2 = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.OutgoingTargetTextBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.OutgoingImpactIntensityTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 29);
+            this.label1.Location = new System.Drawing.Point(5, 15);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 13);
+            this.label1.Size = new System.Drawing.Size(80, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Target";
+            this.label1.Text = "Incoming target";
             // 
-            // targetTextBox
+            // IncomingTargetTextBox
             // 
-            this.targetTextBox.Location = new System.Drawing.Point(206, 26);
-            this.targetTextBox.Name = "targetTextBox";
-            this.targetTextBox.Size = new System.Drawing.Size(227, 20);
-            this.targetTextBox.TabIndex = 1;
-            this.targetTextBox.Text = "Enter exact target name here";
+            this.IncomingTargetTextBox.Location = new System.Drawing.Point(205, 15);
+            this.IncomingTargetTextBox.Name = "IncomingTargetTextBox";
+            this.IncomingTargetTextBox.Size = new System.Drawing.Size(227, 20);
+            this.IncomingTargetTextBox.TabIndex = 1;
+            this.IncomingTargetTextBox.Text = "YOU";
             // 
             // ScanButton
             // 
-            this.ScanButton.Location = new System.Drawing.Point(9, 136);
+            this.ScanButton.Location = new System.Drawing.Point(8, 179);
             this.ScanButton.Name = "ScanButton";
             this.ScanButton.Size = new System.Drawing.Size(109, 23);
-            this.ScanButton.TabIndex = 4;
+            this.ScanButton.TabIndex = 6;
             this.ScanButton.Text = "Scan for devices";
             this.ScanButton.UseVisualStyleBackColor = true;
             this.ScanButton.Click += new System.EventHandler(this.Button1_ClickAsync);
@@ -91,16 +97,15 @@ namespace ButtplACT
             // deviceListBox
             // 
             this.deviceListBox.FormattingEnabled = true;
-            this.deviceListBox.Location = new System.Drawing.Point(206, 123);
+            this.deviceListBox.Location = new System.Drawing.Point(205, 166);
             this.deviceListBox.Name = "deviceListBox";
             this.deviceListBox.Size = new System.Drawing.Size(227, 94);
-            this.deviceListBox.TabIndex = 5;
-            this.deviceListBox.ItemCheck += CheckedListBox1_ItemCheck;
+            this.deviceListBox.TabIndex = 7;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 59);
+            this.label2.Location = new System.Drawing.Point(5, 75);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(72, 13);
             this.label2.TabIndex = 4;
@@ -108,28 +113,28 @@ namespace ButtplACT
             // 
             // baseIntensityTextBox
             // 
-            this.baseIntensityTextBox.Location = new System.Drawing.Point(206, 56);
+            this.baseIntensityTextBox.Location = new System.Drawing.Point(205, 75);
             this.baseIntensityTextBox.Name = "baseIntensityTextBox";
             this.baseIntensityTextBox.Size = new System.Drawing.Size(227, 20);
-            this.baseIntensityTextBox.TabIndex = 2;
-            this.baseIntensityTextBox.Text = "Enter base intensity (0 to 100)";
+            this.baseIntensityTextBox.TabIndex = 3;
+            this.baseIntensityTextBox.Text = "10";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 89);
+            this.label3.Location = new System.Drawing.Point(5, 105);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(80, 13);
+            this.label3.Size = new System.Drawing.Size(125, 13);
             this.label3.TabIndex = 6;
-            this.label3.Text = "Impact intensity";
+            this.label3.Text = "Incoming impact intensity";
             // 
-            // ImpactIntensityTextBox
+            // IncomingImpactIntensityTextBox
             // 
-            this.ImpactIntensityTextBox.Location = new System.Drawing.Point(206, 86);
-            this.ImpactIntensityTextBox.Name = "ImpactIntensityTextBox";
-            this.ImpactIntensityTextBox.Size = new System.Drawing.Size(227, 20);
-            this.ImpactIntensityTextBox.TabIndex = 3;
-            this.ImpactIntensityTextBox.Text = "Enter impact intensity (0 to 100)";
+            this.IncomingImpactIntensityTextBox.Location = new System.Drawing.Point(205, 102);
+            this.IncomingImpactIntensityTextBox.Name = "IncomingImpactIntensityTextBox";
+            this.IncomingImpactIntensityTextBox.Size = new System.Drawing.Size(227, 20);
+            this.IncomingImpactIntensityTextBox.TabIndex = 4;
+            this.IncomingImpactIntensityTextBox.Text = "80";
             // 
             // button2
             // 
@@ -139,20 +144,58 @@ namespace ButtplACT
             this.button2.TabIndex = 8;
             this.button2.Text = "Ready!";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button2.Click += new System.EventHandler(this.Button2_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(5, 42);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(80, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Outgoing target";
+            // 
+            // OutgoingTargetTextBox
+            // 
+            this.OutgoingTargetTextBox.Location = new System.Drawing.Point(205, 42);
+            this.OutgoingTargetTextBox.Name = "OutgoingTargetTextBox";
+            this.OutgoingTargetTextBox.Size = new System.Drawing.Size(227, 20);
+            this.OutgoingTargetTextBox.TabIndex = 2;
+            this.OutgoingTargetTextBox.Text = "YOU";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(8, 132);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(125, 13);
+            this.label5.TabIndex = 10;
+            this.label5.Text = "Outgoing impact intensity";
+            // 
+            // OutgoingImpactIntensityTextBox
+            // 
+            this.OutgoingImpactIntensityTextBox.Location = new System.Drawing.Point(205, 132);
+            this.OutgoingImpactIntensityTextBox.Name = "OutgoingImpactIntensityTextBox";
+            this.OutgoingImpactIntensityTextBox.Size = new System.Drawing.Size(227, 20);
+            this.OutgoingImpactIntensityTextBox.TabIndex = 5;
+            this.OutgoingImpactIntensityTextBox.Text = "45";
             // 
             // PluginSample
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.OutgoingImpactIntensityTextBox);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.OutgoingTargetTextBox);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.button2);
-            this.Controls.Add(this.ImpactIntensityTextBox);
+            this.Controls.Add(this.IncomingImpactIntensityTextBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.baseIntensityTextBox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.deviceListBox);
             this.Controls.Add(this.ScanButton);
-            this.Controls.Add(this.targetTextBox);
+            this.Controls.Add(this.IncomingTargetTextBox);
             this.Controls.Add(this.label1);
             this.Name = "PluginSample";
             this.Size = new System.Drawing.Size(686, 384);
@@ -164,12 +207,67 @@ namespace ButtplACT
         private Label label2;
         private TextBox baseIntensityTextBox;
         private Label label3;
-        private TextBox ImpactIntensityTextBox;
+        private TextBox IncomingImpactIntensityTextBox;
         private Button button2;
+        private Label label4;
+
+        #endregion
+
+        private TextBox IncomingTargetTextBox;
+        private Button ScanButton;
+        private System.Windows.Forms.Label label1;
+        private CheckedListBox deviceListBox;
+        private TextBox OutgoingTargetTextBox;
+        private Label label5;
+        private TextBox OutgoingImpactIntensityTextBox;
+        private ButtplugClient bpcl;
+
+        #endregion
+        public PluginSample()
+        {
+            InitializeComponent();
+            this.deviceListBox.ItemCheck += DeviceListBox_ItemCheck;
+        }
+
+        private class ButtplACTEvent
+        {
+            private double[] intensities;
+            private uint duration;
+            private string victim;
+            private string attacker;
+            private string actionName;
+            private string targetDeviceName;
+
+            public double[] Intensities { get => intensities; set => intensities = value; }
+            public uint Duration { get => duration; set => duration = value; }
+            public string Victim { get => victim; set => victim = value; }
+            public string Attacker { get => attacker; set => attacker = value; }
+            public string ActionName { get => actionName; set => actionName = value; }
+            public string TargetDeviceName { get => targetDeviceName; set => targetDeviceName = value; }
+
+            public ButtplACTEvent(
+                double[] intensities,
+                uint duration,
+                string victim,
+                string attacker,
+                string actionname,
+                string targetdevicename)
+            {
+                Intensities = intensities; Duration = duration; Victim = victim; Attacker = attacker; ActionName = actionname;
+                TargetDeviceName = targetdevicename;
+            }
+        }
+
+        private ConcurrentQueue<ButtplACTEvent> bplevents;
+
+        private ConcurrentQueue<ButtplACTEvent> ButtplACTEventQueue { get => bplevents; set => bplevents = value; }
+        private List<ButtplACTEvent> KnownButtplACTEvents = new List<ButtplACTEvent>();
+
         List<ButtplugClientDevice> enabledDevices = new List<ButtplugClientDevice>();
 
-        private async void CheckedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
+        private async void DeviceListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
+            // XXX: also allow users to disable a device...
             await bpcl.Devices[e.Index].SendVibrateCmd(.5);
             await Task.Delay(300);
             await bpcl.Devices[e.Index].SendVibrateCmd(0);
@@ -180,22 +278,7 @@ namespace ButtplACT
             }
         }
 
-        #endregion
-
-        private TextBox targetTextBox;
-        private Button ScanButton;
-        private System.Windows.Forms.Label label1;
-        private CheckedListBox deviceListBox;
-        private ButtplugClient bpcl;
-
-        #endregion
-        public PluginSample()
-        {
-            InitializeComponent();
-        }
-
         Label lblStatus;    // The status label that appears in ACT's Plugin tab
-        string settingsFile = Path.Combine(ActGlobals.oFormActMain.AppDataFolder.FullName, "Config\\PluginSample.config.xml");
 
         private VibeState vibeState;
 
@@ -225,17 +308,36 @@ namespace ButtplACT
             public double Intensity { get; set; }
         }
 
-        private Task DoAmbientVibrations()
+        private Task DoVibrations()
         {
             return new Task(async (object obj) =>
             {
                 VibeState state = (VibeState)obj;
                 while (state.Running)
                 {
+                    while (ButtplACTEventQueue.TryDequeue(out ButtplACTEvent ev))
+                    {
+                        if (ev == null)
+                        {
+                            continue;
+                        }
+                        if (ev.TargetDeviceName.Equals(""))
+                        {
+                            foreach (ButtplugClientDevice dev in enabledDevices)
+                            {
+                                // XXX: do gradient math here or somewhere else?
+                                await dev.SendVibrateCmd(ev.Intensities[0]);
+                                Thread.Sleep((int)ev.Duration);
+                            }
+                        }
+                    }
+
+                    // XXX: more stuff to differentiate base stim for different devices
                     foreach (ButtplugClientDevice dev in enabledDevices)
                     {
-                        await dev.SendVibrateCmd(state.Intensity);
-                        await Task.Delay(250);
+                        await dev.SendVibrateCmd(getBaseIntensity());
+                        Thread.Sleep(100);
+
                     }
                 }
             }, this.vibeState);
@@ -246,6 +348,11 @@ namespace ButtplACT
             lock (vibeState)
             {
                 this.vibeState.Intensity = 0;
+                this.vibeState.Running = false;
+            }
+            foreach (ButtplugClientDevice dev in enabledDevices)
+            {
+                dev.StopDeviceCmd();
             }
         }
 
@@ -264,17 +371,32 @@ namespace ButtplACT
             return baseIntensity;
         }
 
-        private double getImpactIntensity()
+        private double GetIncomingImpactIntensity()
         {
             double impactIntensity;
             try
             {
-                impactIntensity = double.Parse(ImpactIntensityTextBox.Text) / 100;
+                impactIntensity = double.Parse(IncomingImpactIntensityTextBox.Text) / 100;
             }
             catch
             {
                 impactIntensity = 1;
-                ImpactIntensityTextBox.Text = "1";
+                IncomingImpactIntensityTextBox.Text = "1";
+            }
+            return impactIntensity;
+        }
+
+        private double GetOutgoingImpactIntensity()
+        {
+            double impactIntensity;
+            try
+            {
+                impactIntensity = double.Parse(OutgoingImpactIntensityTextBox.Text) / 100;
+            }
+            catch
+            {
+                impactIntensity = 1;
+                OutgoingImpactIntensityTextBox.Text = "1";
             }
             return impactIntensity;
         }
@@ -285,7 +407,10 @@ namespace ButtplACT
             {
                 double baseIntensity = getBaseIntensity();
                 this.vibeState.Intensity = baseIntensity;
+                this.vibeState.Running = true;
             }
+            this.ButtplACTEventQueue = new ConcurrentQueue<ButtplACTEvent>();
+            DoVibrations().Start();
         }
 
         public void DeInitPlugin()
@@ -306,18 +431,12 @@ namespace ButtplACT
 
         void OFormActMain_AfterCombatAction(bool isImport, CombatActionEventArgs actionInfo)
         {
-            if (actionInfo.victim.Equals(targetTextBox.Text))
-            {
-                lock (this.vibeState)
-                {
-                    vibeState.Intensity = getImpactIntensity();
-                }
-                Thread.Sleep(480);
-                lock (this.vibeState)
-                {
-                    vibeState.Intensity = getBaseIntensity();
-                }
-            }
+            // XXX: also find actionname and whatnot
+            ButtplACTEvent ev = KnownButtplACTEvents.Find(
+                c => ((c.Victim.Equals("") || c.Victim.Equals(actionInfo.victim))
+                    && (c.Attacker.Equals("") || c.Attacker.Equals(actionInfo.attacker))));
+
+            if (ev != null) ButtplACTEventQueue.Enqueue(ev);
         }
 
         private bool scanning = false;
@@ -359,32 +478,52 @@ namespace ButtplACT
 
         private bool settingsLocked = false;
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Button2_Click(object sender, EventArgs e)
         {
-            if(settingsLocked)
+            if (settingsLocked)
             {
                 vibeState.Running = false;
                 foreach (ButtplugClientDevice dev in enabledDevices)
                 {
                     dev.SendVibrateCmd(0);
                 }
-                targetTextBox.ReadOnly = false;
+
+                OutgoingImpactIntensityTextBox.ReadOnly = false;
+                OutgoingTargetTextBox.ReadOnly = false;
+                IncomingImpactIntensityTextBox.ReadOnly = false;
+                IncomingTargetTextBox.ReadOnly = false;
                 baseIntensityTextBox.ReadOnly = false;
-                ImpactIntensityTextBox.ReadOnly = false;
                 ScanButton.Enabled = true;
                 deviceListBox.Enabled = true;
                 button2.Text = "Ready!";
+
+                // XXX: probably don't want this later on?
+                KnownButtplACTEvents.Clear();
+
+                settingsLocked = false;
             }
             else
             {
-                button2.Text = "Stop!";
                 vibeState.Running = true;
-                DoAmbientVibrations().Start();
-                targetTextBox.ReadOnly = true;
+                OutgoingImpactIntensityTextBox.ReadOnly = true;
+                OutgoingTargetTextBox.ReadOnly = true;
+                IncomingImpactIntensityTextBox.ReadOnly = true;
+                IncomingTargetTextBox.ReadOnly = true;
                 baseIntensityTextBox.ReadOnly = true;
-                ImpactIntensityTextBox.ReadOnly = true;
+                button2.Text = "Stop!";
                 ScanButton.Enabled = false;
                 deviceListBox.Enabled = false;
+
+                double[] incIntensities = new double[1];
+                incIntensities[0] = GetIncomingImpactIntensity();
+                ButtplACTEvent inc = new ButtplACTEvent(incIntensities, 300, IncomingTargetTextBox.Text, "", "", "");
+                KnownButtplACTEvents.Add(inc);
+                double[] outIntensities = new double[1];
+                outIntensities[0] = GetOutgoingImpactIntensity();
+                ButtplACTEvent outg = new ButtplACTEvent(outIntensities, 150, "", OutgoingTargetTextBox.Text, "", "");
+                KnownButtplACTEvents.Add(outg);
+
+                settingsLocked = true;
             }
         }
     }
