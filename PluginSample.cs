@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using Timer = System.Threading.Timer;
 
 [assembly: AssemblyTitle("ButtplACT")]
 [assembly: AssemblyDescription("Minimalistic plugin interfacing with buttplug.io to make stuff vibrate when someone gets hit")]
@@ -296,6 +297,7 @@ namespace ButtplACT
             {
                 enabledDevices.Add(bpcl.Devices[e.Index]);
             }
+            vibeState.Devices = enabledDevices.ToArray();
         }
 
         Label lblStatus;    // The status label that appears in ACT's Plugin tab
@@ -318,7 +320,7 @@ namespace ButtplACT
 
             // Do I *need* to do async stuff here? lmao
             bpcl.ConnectAsync();
-            vibeState = new VibeState(false, 0.0, "ambient");
+            vibeState = new VibeState(false, 0.0, "ambient", null);
             lblStatus.Text = "Plugin Started";
         }
 
@@ -327,120 +329,122 @@ namespace ButtplACT
             public bool Running { get; set; }
             public double Intensity { get; set; }
             public string Cause { get; set; }
+            public ButtplugClientDevice[] Devices { get; set; }
 
-            public VibeState(bool running, double intensity, string cause)
+            public VibeState(bool running, double intensity, string cause, ButtplugClientDevice[] devices)
             {
                 Running = running;
                 Intensity = intensity;
                 Cause = cause;
+                Devices = devices;
             }
 
             public object Clone()
             {
                 return MemberwiseClone();
             }
+
+            override public string ToString()
+            {
+                return "dev: " + Devices[0].Name + " intensity: " + Intensity + " cause: " + Cause;
+            }
         }
 
-        private SortedList<ulong, VibeState> FutureVibeStates;
-
-        private Task ConvertEventsToVibrations()
+        private IEnumerable<VibeState> ConvertEventsToVibrations()
         {
-            return new Task(() =>
+            SortedList<long, VibeState> futureEvents = new SortedList<long, VibeState>();
+            while (vibeState.Running)
             {
-                double baseIntensity = getBaseIntensity();
-                while (vibeState.Running)
+                if (PreparedButtplACTEvents.TryTake(out ButtplACTEvent ev))
                 {
-                    ulong nowTicks = (ulong)DateTime.UtcNow.Ticks;
-                    ulong nowTicksTrunc = nowTicks - (nowTicks % 1000000);
+                    long evTruncTicks = ev.StartTime.Ticks;
+                    evTruncTicks = evTruncTicks - (evTruncTicks % 1000000) + 1000000;
 
-                    while (PreparedButtplACTEvents.TryTake(out ButtplACTEvent ev))
+                    System.Diagnostics.Debug.WriteLine("at " + DateTime.Now.Ticks + " building " + evTruncTicks + " " + ev.ActionName + " " + ev.Intensities[0]);
+
+                    if (!futureEvents.ContainsKey(evTruncTicks) || null == futureEvents[evTruncTicks])
                     {
-                        System.Diagnostics.Debug.WriteLine("processing ev: " + ev.ToString());
-                        uint amount = ev.Duration / 100;
-                        for (int i = 0; i < amount; ++i)
-                        {
-                            // XXX: [0] isn't the right index but I wanna get it working first
-                            // TODO: figure out how to map e.g. [20, 40] to 6 ticks or somesuch
-                            lock (FutureVibeStates)
-                            {
-                                if (FutureVibeStates.ContainsKey(nowTicksTrunc))
-                                {
-                                    FutureVibeStates[nowTicksTrunc].Intensity =
-                                        (ev.Absolute ? ev.Intensities[0] : FutureVibeStates[nowTicksTrunc].Intensity + ev.Intensities[0]);
-                                }
+                        futureEvents[evTruncTicks] = (VibeState)vibeState.Clone();
+                    }
 
-                                else
+                    futureEvents[evTruncTicks].Cause += " +" + ev.ActionName;
+                    if (ev.Absolute)
+                    {
+                        futureEvents[evTruncTicks].Intensity = ev.Intensities[0];
+                    }
+                    else
+                    {
+                        futureEvents[evTruncTicks].Intensity += ev.Intensities[0];
+                        // XXX: is there sugar for this..?
+                        futureEvents[evTruncTicks].Intensity =
+                            futureEvents[evTruncTicks].Intensity > 1 ?
+                                1 : futureEvents[evTruncTicks].Intensity;
+                    }
+                    if (ev.Duration > 100)
+                    {
+                        VibeState state = futureEvents[evTruncTicks];
+                        for (int i = 0; i < ev.Duration / 100; ++i)
+                        {
+                            long iterTicks = evTruncTicks + i * 1000000;
+                            if (!futureEvents.ContainsKey(iterTicks) || null == futureEvents[iterTicks])
+                            {
+                                futureEvents[iterTicks] = (VibeState)vibeState.Clone();
+                                futureEvents[iterTicks].Intensity = ev.Intensities[0];
+                                futureEvents[iterTicks].Cause += ev.ActionName;
+                            }
+                            else
+                            {
+                                if (!ev.Absolute)
                                 {
-                                    FutureVibeStates[nowTicksTrunc] = new VibeState(true, ev.Intensities[0], ev.ActionName);
+                                    futureEvents[iterTicks].Intensity -= ev.Intensities[0];
+                                    futureEvents[iterTicks].Intensity =
+                                        futureEvents[iterTicks].Intensity < 0 ?
+                                        0 : futureEvents[iterTicks].Intensity;
                                 }
                             }
-                            nowTicksTrunc += 1000000;
                         }
+                        long eventEndTicks = evTruncTicks + (ev.Duration - 100) * 10000;
+                        futureEvents[eventEndTicks].Cause += " -" + ev.ActionName;
                     }
-
-                    if (!FutureVibeStates.ContainsKey(nowTicksTrunc))
-                    {
-                        lock (FutureVibeStates)
-                        {
-                            FutureVibeStates[nowTicksTrunc] = (VibeState)vibeState.Clone();
-                        }
-                    }
-                    Thread.Sleep(100);
                 }
-            });
-        }
-
-        private Task DoVibrations()
-        {
-            // can't do this with a task cause scheduling means it basically gets batch run or something? not sure
-            // but that's what the output looked like basically...
-            return new Task(async () =>
-            {
-                while (vibeState.Running)
+                if (futureEvents.Keys.Count > 0)
                 {
-                    VibeState currentVibeState = null;
-                    // XXX: oh god
-                    while (currentVibeState == null)
-                    {
-                        try
-                        {
-                            currentVibeState = FutureVibeStates[FutureVibeStates.Keys[0]];
-                        }
-                        catch
-                        {
-                            await Task.Delay(100);
-                        }
-                    }
-                    ulong key = FutureVibeStates.Keys[0];
-                    currentVibeState = FutureVibeStates[key];
-                    lock (FutureVibeStates)
-                    {
-                        FutureVibeStates.RemoveAt(0);
-                    }
-                    foreach (ButtplugClientDevice dev in enabledDevices)
-                    {
-                        System.Diagnostics.Debug.WriteLine(key + ": doing " + currentVibeState.Cause + " at " + currentVibeState.Intensity);
-                        double intensity = currentVibeState.Intensity < 0 ? 0 :
-                            currentVibeState.Intensity > 1 ? 1 : currentVibeState.Intensity;
-                        await dev.SendVibrateCmd(intensity);
-                    }
-                    await Task.Delay(100);
+                    System.Diagnostics.Debug.WriteLine("at " + DateTime.Now.Ticks + " yielding: " + futureEvents[futureEvents.Keys[0]].ToString());
+                    yield return futureEvents[futureEvents.Keys[0]];
+                    futureEvents.Remove(futureEvents.Keys[0]);
                 }
-            });
+                else
+                {
+                    yield return (VibeState)vibeState.Clone();
+                }
+            }
         }
 
-        private void OFormActMain_OnCombatEnd(bool isImport, CombatToggleEventArgs encounterInfo)
+        private Timer VibrateTimer;
+        private void DoVibrations()
         {
-            lock (vibeState)
+            async void DoVibrationsTimerCallback(Object vibeStateEnumerator)
             {
-                vibeState.Intensity = 0;
-                vibeState.Running = false;
+                VibeState curVibeState = ((IEnumerator<VibeState>)vibeStateEnumerator).Current;
+                if (curVibeState == null)
+                {
+                    ((IEnumerator<VibeState>)vibeStateEnumerator).MoveNext();
+                    return;
+                }
+                foreach (ButtplugClientDevice device in curVibeState.Devices)
+                {
+                    System.Diagnostics.Debug.WriteLine("at " + DateTime.Now.Ticks + " actually sending vibes: " + curVibeState.ToString());
+                    await device.SendVibrateCmd(curVibeState.Intensity);
+                }
+                ((IEnumerator<VibeState>)vibeStateEnumerator).MoveNext();
             }
-            foreach (ButtplugClientDevice dev in enabledDevices)
-            {
-                dev.StopDeviceCmd();
-            }
+            IEnumerable<VibeState> states = ConvertEventsToVibrations();
+            IEnumerator<VibeState> enumerator = states.GetEnumerator();
+            long start = 0;
+            long inter = 100;
+            VibrateTimer = new Timer(new TimerCallback(DoVibrationsTimerCallback), enumerator, start, inter);
         }
+
 
         private double getBaseIntensity()
         {
@@ -496,26 +500,11 @@ namespace ButtplACT
                 this.vibeState.Running = true;
             }
             PreparedButtplACTEvents = new BlockingCollection<ButtplACTEvent>();
-            FutureVibeStates = new SortedList<ulong, VibeState>();
-            ConvertEventsToVibrations().Start();
-            DoVibrations().Start();
-        }
 
-        public void DeInitPlugin()
-        {
-            // Unsubscribe from any events you listen to when exiting!
-            ActGlobals.oFormActMain.AfterCombatAction -= OFormActMain_AfterCombatAction;
-            ActGlobals.oFormActMain.OnCombatStart -= OFormActMain_OnCombatStartAsync;
-            ActGlobals.oFormActMain.OnCombatEnd -= OFormActMain_OnCombatEnd;
-            lock (vibeState)
-            {
-                vibeState.Running = false;
-            }
-            bpcl.DisconnectAsync();
-            Thread.Sleep(250);
-            lblStatus.Text = "Plugin Exited";
+            DoVibrations();
+            // producer for VibeStates 
+            Task.Factory.StartNew(ConvertEventsToVibrations);
         }
-        #endregion
 
         void OFormActMain_AfterCombatAction(bool isImport, CombatActionEventArgs actionInfo)
         {
@@ -536,6 +525,35 @@ namespace ButtplACT
                 PreparedButtplACTEvents.Add(actualEvent);
             }
         }
+
+        private void OFormActMain_OnCombatEnd(bool isImport, CombatToggleEventArgs encounterInfo)
+        {
+            lock (vibeState)
+            {
+                vibeState.Intensity = 0;
+                vibeState.Running = false;
+            }
+            foreach (ButtplugClientDevice dev in enabledDevices)
+            {
+                dev.StopDeviceCmd();
+            }
+            VibrateTimer.Dispose();
+        }
+
+        public void DeInitPlugin()
+        {
+            // Unsubscribe from any events you listen to when exiting!
+            ActGlobals.oFormActMain.AfterCombatAction -= OFormActMain_AfterCombatAction;
+            ActGlobals.oFormActMain.OnCombatStart -= OFormActMain_OnCombatStartAsync;
+            ActGlobals.oFormActMain.OnCombatEnd -= OFormActMain_OnCombatEnd;
+            lock (vibeState)
+            {
+                vibeState.Running = false;
+            }
+            bpcl.DisconnectAsync();
+            lblStatus.Text = "Plugin Exited";
+        }
+        #endregion
 
         private bool scanning = false;
 
@@ -566,7 +584,7 @@ namespace ButtplACT
             else
             {
                 vibeState.Running = false;
-                await Task.Delay(260);
+                await Task.Delay(100);
                 enabledDevices.Clear();
                 await StartScanning();
                 scanning = !scanning;
@@ -614,16 +632,16 @@ namespace ButtplACT
 
                 double[] incIntensities = new double[1];
                 incIntensities[0] = GetIncomingImpactIntensity();
-                ButtplACTEvent inc = new ButtplACTEvent(incIntensities, 300, IncomingTargetTextBox.Text, "", "", "", true);
+                ButtplACTEvent inc = new ButtplACTEvent(incIntensities, 500, IncomingTargetTextBox.Text, "", "", "", true);
                 KnownButtplACTEvents.Add(inc);
                 double[] outIntensities = new double[1];
                 outIntensities[0] = GetOutgoingImpactIntensity();
-                ButtplACTEvent outg = new ButtplACTEvent(outIntensities, 100, "", OutgoingTargetTextBox.Text, "", "", true);
+                ButtplACTEvent outg = new ButtplACTEvent(outIntensities, 200, "", OutgoingTargetTextBox.Text, "", "", true);
                 KnownButtplACTEvents.Add(outg);
-                double[] rampartIntensities = new double[1];
-                rampartIntensities[0] = 20;
-                ButtplACTEvent rampart = new ButtplACTEvent(rampartIntensities, 20000, IncomingTargetTextBox.Text, "", "Rampart", "", false);
-                KnownButtplACTEvents.Add(rampart);
+                double[] regenIntensities = new double[1];
+                regenIntensities[0] = 0.5;
+                ButtplACTEvent regen = new ButtplACTEvent(regenIntensities, 21000, "YOU", "YOU", "Regen", "", true);
+                KnownButtplACTEvents.Add(regen);
 
                 settingsLocked = true;
             }
