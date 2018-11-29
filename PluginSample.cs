@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+using System.Xml.Serialization;
 using Timer = System.Threading.Timer;
 
 [assembly: AssemblyTitle("ButtplACT")]
@@ -53,41 +54,28 @@ namespace ButtplACT
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.IncomingTargetTextBox = new System.Windows.Forms.TextBox();
             this.ScanButton = new System.Windows.Forms.Button();
             this.deviceListBox = new System.Windows.Forms.CheckedListBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.baseIntensityTextBox = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.IncomingImpactIntensityTextBox = new System.Windows.Forms.TextBox();
             this.button2 = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.OutgoingTargetTextBox = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.OutgoingImpactIntensityTextBox = new System.Windows.Forms.TextBox();
+            this.EventDataGrid = new System.Windows.Forms.DataGridView();
+            this.ActionName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Attacker = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Victim = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Intensity = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Duration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.EnabledCheckbox = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.SaveConfigButton = new System.Windows.Forms.Button();
+            this.LoadConfigButton = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.BaseVibrationIntensity = new System.Windows.Forms.TextBox();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            ((System.ComponentModel.ISupportInitialize)(this.EventDataGrid)).BeginInit();
             this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(5, 15);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(80, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Incoming target";
-            // 
-            // IncomingTargetTextBox
-            // 
-            this.IncomingTargetTextBox.Location = new System.Drawing.Point(205, 15);
-            this.IncomingTargetTextBox.Name = "IncomingTargetTextBox";
-            this.IncomingTargetTextBox.Size = new System.Drawing.Size(227, 20);
-            this.IncomingTargetTextBox.TabIndex = 1;
-            this.IncomingTargetTextBox.Text = "YOU";
             // 
             // ScanButton
             // 
-            this.ScanButton.Location = new System.Drawing.Point(8, 179);
+            this.ScanButton.Location = new System.Drawing.Point(679, 293);
             this.ScanButton.Name = "ScanButton";
             this.ScanButton.Size = new System.Drawing.Size(109, 23);
             this.ScanButton.TabIndex = 6;
@@ -98,129 +86,150 @@ namespace ButtplACT
             // deviceListBox
             // 
             this.deviceListBox.FormattingEnabled = true;
-            this.deviceListBox.Location = new System.Drawing.Point(205, 166);
+            this.deviceListBox.Location = new System.Drawing.Point(679, 15);
             this.deviceListBox.Name = "deviceListBox";
-            this.deviceListBox.Size = new System.Drawing.Size(227, 94);
+            this.deviceListBox.Size = new System.Drawing.Size(227, 259);
             this.deviceListBox.TabIndex = 7;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(5, 75);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(72, 13);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Base intensity";
-            // 
-            // baseIntensityTextBox
-            // 
-            this.baseIntensityTextBox.Location = new System.Drawing.Point(205, 75);
-            this.baseIntensityTextBox.Name = "baseIntensityTextBox";
-            this.baseIntensityTextBox.Size = new System.Drawing.Size(227, 20);
-            this.baseIntensityTextBox.TabIndex = 3;
-            this.baseIntensityTextBox.Text = "10";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(5, 105);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(125, 13);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "Incoming impact intensity";
-            // 
-            // IncomingImpactIntensityTextBox
-            // 
-            this.IncomingImpactIntensityTextBox.Location = new System.Drawing.Point(205, 102);
-            this.IncomingImpactIntensityTextBox.Name = "IncomingImpactIntensityTextBox";
-            this.IncomingImpactIntensityTextBox.Size = new System.Drawing.Size(227, 20);
-            this.IncomingImpactIntensityTextBox.TabIndex = 4;
-            this.IncomingImpactIntensityTextBox.Text = "80";
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(334, 269);
+            this.button2.Location = new System.Drawing.Point(808, 294);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(98, 34);
+            this.button2.Size = new System.Drawing.Size(98, 23);
             this.button2.TabIndex = 8;
             this.button2.Text = "Ready!";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.Button2_Click);
             // 
-            // label4
+            // EventDataGrid
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(5, 42);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(80, 13);
-            this.label4.TabIndex = 9;
-            this.label4.Text = "Outgoing target";
+            this.EventDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.EventDataGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ActionName,
+            this.Attacker,
+            this.Victim,
+            this.Intensity,
+            this.Duration,
+            this.EnabledCheckbox});
+            this.EventDataGrid.Location = new System.Drawing.Point(8, 15);
+            this.EventDataGrid.Name = "EventDataGrid";
+            this.EventDataGrid.Size = new System.Drawing.Size(644, 272);
+            this.EventDataGrid.TabIndex = 11;
             // 
-            // OutgoingTargetTextBox
+            // ActionName
             // 
-            this.OutgoingTargetTextBox.Location = new System.Drawing.Point(205, 42);
-            this.OutgoingTargetTextBox.Name = "OutgoingTargetTextBox";
-            this.OutgoingTargetTextBox.Size = new System.Drawing.Size(227, 20);
-            this.OutgoingTargetTextBox.TabIndex = 2;
-            this.OutgoingTargetTextBox.Text = "YOU";
+            this.ActionName.HeaderText = "Action name";
+            this.ActionName.Name = "ActionName";
             // 
-            // label5
+            // Attacker
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(8, 132);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(125, 13);
-            this.label5.TabIndex = 10;
-            this.label5.Text = "Outgoing impact intensity";
+            this.Attacker.HeaderText = "Attacker";
+            this.Attacker.Name = "Attacker";
             // 
-            // OutgoingImpactIntensityTextBox
+            // Victim
             // 
-            this.OutgoingImpactIntensityTextBox.Location = new System.Drawing.Point(205, 132);
-            this.OutgoingImpactIntensityTextBox.Name = "OutgoingImpactIntensityTextBox";
-            this.OutgoingImpactIntensityTextBox.Size = new System.Drawing.Size(227, 20);
-            this.OutgoingImpactIntensityTextBox.TabIndex = 5;
-            this.OutgoingImpactIntensityTextBox.Text = "45";
+            this.Victim.HeaderText = "Victim";
+            this.Victim.Name = "Victim";
+            // 
+            // Intensity
+            // 
+            this.Intensity.HeaderText = "Intensity";
+            this.Intensity.Name = "Intensity";
+            // 
+            // Duration
+            // 
+            this.Duration.HeaderText = "Duration";
+            this.Duration.Name = "Duration";
+            // 
+            // EnabledCheckbox
+            // 
+            this.EnabledCheckbox.FalseValue = "false";
+            this.EnabledCheckbox.HeaderText = "Enabled";
+            this.EnabledCheckbox.Name = "EnabledCheckbox";
+            this.EnabledCheckbox.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.EnabledCheckbox.TrueValue = "true";
+            // 
+            // SaveConfigButton
+            // 
+            this.SaveConfigButton.Location = new System.Drawing.Point(452, 293);
+            this.SaveConfigButton.Name = "SaveConfigButton";
+            this.SaveConfigButton.Size = new System.Drawing.Size(97, 24);
+            this.SaveConfigButton.TabIndex = 14;
+            this.SaveConfigButton.Text = "Save config";
+            this.SaveConfigButton.UseVisualStyleBackColor = true;
+            this.SaveConfigButton.Click += new System.EventHandler(this.SaveConfigButton_Click);
+            // 
+            // LoadConfigButton
+            // 
+            this.LoadConfigButton.Location = new System.Drawing.Point(555, 294);
+            this.LoadConfigButton.Name = "LoadConfigButton";
+            this.LoadConfigButton.Size = new System.Drawing.Size(97, 23);
+            this.LoadConfigButton.TabIndex = 15;
+            this.LoadConfigButton.Text = "Load config";
+            this.LoadConfigButton.UseVisualStyleBackColor = true;
+            this.LoadConfigButton.Click += new System.EventHandler(this.LoadConfigButton_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(5, 297);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(115, 13);
+            this.label1.TabIndex = 16;
+            this.label1.Text = "Base vibration intensity";
+            // 
+            // BaseVibrationIntensity
+            // 
+            this.BaseVibrationIntensity.Location = new System.Drawing.Point(126, 293);
+            this.BaseVibrationIntensity.Name = "BaseVibrationIntensity";
+            this.BaseVibrationIntensity.Size = new System.Drawing.Size(100, 20);
+            this.BaseVibrationIntensity.TabIndex = 17;
+            // 
+            // saveFileDialog
+            // 
+            this.saveFileDialog.DefaultExt = "bpc";
+            // 
+            // openFileDialog
+            // 
+            this.openFileDialog.FileName = "openFileDialog";
             // 
             // PluginSample
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.OutgoingImpactIntensityTextBox);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.OutgoingTargetTextBox);
-            this.Controls.Add(this.label4);
+            this.Controls.Add(this.BaseVibrationIntensity);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.LoadConfigButton);
+            this.Controls.Add(this.SaveConfigButton);
+            this.Controls.Add(this.EventDataGrid);
             this.Controls.Add(this.button2);
-            this.Controls.Add(this.IncomingImpactIntensityTextBox);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.baseIntensityTextBox);
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.deviceListBox);
             this.Controls.Add(this.ScanButton);
-            this.Controls.Add(this.IncomingTargetTextBox);
-            this.Controls.Add(this.label1);
             this.Name = "PluginSample";
-            this.Size = new System.Drawing.Size(686, 384);
+            this.Size = new System.Drawing.Size(914, 330);
+            ((System.ComponentModel.ISupportInitialize)(this.EventDataGrid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
-
-        private Label label2;
-        private TextBox baseIntensityTextBox;
-        private Label label3;
-        private TextBox IncomingImpactIntensityTextBox;
         private Button button2;
-        private Label label4;
 
         #endregion
-
-        private TextBox IncomingTargetTextBox;
         private Button ScanButton;
-        private System.Windows.Forms.Label label1;
         private CheckedListBox deviceListBox;
-        private TextBox OutgoingTargetTextBox;
-        private Label label5;
-        private TextBox OutgoingImpactIntensityTextBox;
+        private DataGridView EventDataGrid;
+        private Button SaveConfigButton;
+        private Button LoadConfigButton;
+        private DataGridViewTextBoxColumn ActionName;
+        private DataGridViewTextBoxColumn Attacker;
+        private DataGridViewTextBoxColumn Victim;
+        private DataGridViewTextBoxColumn Intensity;
+        private DataGridViewTextBoxColumn Duration;
+        private DataGridViewCheckBoxColumn EnabledCheckbox;
+        private Label label1;
+        private TextBox BaseVibrationIntensity;
+        private SaveFileDialog saveFileDialog;
+        private OpenFileDialog openFileDialog;
         private ButtplugClient bpcl;
 
         #endregion
@@ -230,7 +239,7 @@ namespace ButtplACT
             this.deviceListBox.ItemCheck += DeviceListBox_ItemCheck;
         }
 
-        private class ButtplACTEvent : ICloneable
+        public class ButtplACTEvent : ICloneable
         {
             private double[] intensities;
             private uint duration;
@@ -252,7 +261,11 @@ namespace ButtplACT
 
             override public string ToString()
             {
-                return "dur: " + Duration + " actn: " + ActionName + " victim: " + Victim + " attacker: " + Attacker;
+                return "duration: " + Duration
+                    + "\tactionname: " + ActionName
+                    + "\tvictim: " + Victim
+                    + "\tattacker: " + Attacker
+                    + "\tintensities: " + Intensities[0];
             }
 
             public ButtplACTEvent(
@@ -264,12 +277,14 @@ namespace ButtplACT
                 string targetdevicename,
                 bool absolute)
             {
-                Intensities = intensities;
+                double[] fallbackIntensities = new double[1];
+                fallbackIntensities[0] = 1.0;
+                Intensities = intensities ?? fallbackIntensities;
                 Duration = duration;
-                Victim = victim;
-                Attacker = attacker;
-                ActionName = actionname;
-                TargetDeviceName = targetdevicename;
+                Victim = victim ?? "";
+                Attacker = attacker ?? "";
+                ActionName = actionname ?? "";
+                TargetDeviceName = targetdevicename ?? "";
                 Absolute = absolute;
             }
 
@@ -445,57 +460,14 @@ namespace ButtplACT
             VibrateTimer = new Timer(new TimerCallback(DoVibrationsTimerCallback), enumerator, start, inter);
         }
 
-
-        private double getBaseIntensity()
-        {
-            double baseIntensity;
-            try
-            {
-                baseIntensity = double.Parse(baseIntensityTextBox.Text) / 100;
-            }
-            catch
-            {
-                baseIntensity = 0;
-                baseIntensityTextBox.Text = "0";
-            }
-            return baseIntensity;
-        }
-
-        private double GetIncomingImpactIntensity()
-        {
-            double impactIntensity;
-            try
-            {
-                impactIntensity = double.Parse(IncomingImpactIntensityTextBox.Text) / 100;
-            }
-            catch
-            {
-                impactIntensity = 1;
-                IncomingImpactIntensityTextBox.Text = "1";
-            }
-            return impactIntensity;
-        }
-
-        private double GetOutgoingImpactIntensity()
-        {
-            double impactIntensity;
-            try
-            {
-                impactIntensity = double.Parse(OutgoingImpactIntensityTextBox.Text) / 100;
-            }
-            catch
-            {
-                impactIntensity = 1;
-                OutgoingImpactIntensityTextBox.Text = "1";
-            }
-            return impactIntensity;
-        }
-
         private void OFormActMain_OnCombatStartAsync(bool isImport, CombatToggleEventArgs encounterInfo)
         {
             lock (vibeState)
             {
-                double baseIntensity = getBaseIntensity();
+                // XXX: fix this
+                double baseIntensity = Double.Parse(BaseVibrationIntensity.Text);
+                baseIntensity = baseIntensity > 100 ? 100 : baseIntensity < 0 ? 0 : baseIntensity;
+                baseIntensity /= 100;
                 this.vibeState.Intensity = baseIntensity;
                 this.vibeState.Running = true;
             }
@@ -604,46 +576,125 @@ namespace ButtplACT
                     dev.SendVibrateCmd(0);
                 }
 
-                OutgoingImpactIntensityTextBox.ReadOnly = false;
-                OutgoingTargetTextBox.ReadOnly = false;
-                IncomingImpactIntensityTextBox.ReadOnly = false;
-                IncomingTargetTextBox.ReadOnly = false;
-                baseIntensityTextBox.ReadOnly = false;
                 ScanButton.Enabled = true;
                 deviceListBox.Enabled = true;
                 button2.Text = "Ready!";
-
-                // XXX: probably don't want this later on?
-                KnownButtplACTEvents.Clear();
+                EventDataGrid.Enabled = true;
 
                 settingsLocked = false;
             }
             else
             {
                 vibeState.Running = true;
-                OutgoingImpactIntensityTextBox.ReadOnly = true;
-                OutgoingTargetTextBox.ReadOnly = true;
-                IncomingImpactIntensityTextBox.ReadOnly = true;
-                IncomingTargetTextBox.ReadOnly = true;
-                baseIntensityTextBox.ReadOnly = true;
-                button2.Text = "Stop!";
+                button2.Text = "Processing...";
                 ScanButton.Enabled = false;
                 deviceListBox.Enabled = false;
+                EventDataGrid.Enabled = false;
 
-                double[] incIntensities = new double[1];
-                incIntensities[0] = GetIncomingImpactIntensity();
-                ButtplACTEvent inc = new ButtplACTEvent(incIntensities, 500, IncomingTargetTextBox.Text, "", "", "", true);
-                KnownButtplACTEvents.Add(inc);
-                double[] outIntensities = new double[1];
-                outIntensities[0] = GetOutgoingImpactIntensity();
-                ButtplACTEvent outg = new ButtplACTEvent(outIntensities, 200, "", OutgoingTargetTextBox.Text, "", "", true);
-                KnownButtplACTEvents.Add(outg);
-                double[] regenIntensities = new double[1];
-                regenIntensities[0] = 0.5;
-                ButtplACTEvent regen = new ButtplACTEvent(regenIntensities, 21000, "YOU", "YOU", "Regen", "", true);
-                KnownButtplACTEvents.Add(regen);
+                KnownButtplACTEvents.Clear();
+
+                PopulateKnownButtplACTEvents();
 
                 settingsLocked = true;
+                button2.Text = "Stop!";
+            }
+        }
+
+        private void PopulateKnownButtplACTEvents()
+        {
+            foreach (DataGridViewRow row in EventDataGrid.Rows)
+            {
+                // XXX: this is stupid and I hate it
+                if (row.Equals(EventDataGrid.Rows[EventDataGrid.Rows.Count - 1]))
+                {
+                    break;
+                }
+                if (row.Cells["EnabledCheckbox"].Value.Equals("true"))
+                {
+                    try
+                    {
+                        double[] intensities = new double[1];
+                        intensities[0] = Double.Parse((String)row.Cells["Intensity"].Value);
+                        intensities[0] = intensities[0] < 0 ? 0 :
+                            intensities[0] > 100 ? 100 : intensities[0];
+                        intensities[0] /= 100;
+                        uint duration = UInt32.Parse((String)row.Cells["Duration"].Value);
+                        string attacker = (String)row.Cells["Attacker"].Value;
+                        string victim = (String)row.Cells["Victim"].Value;
+                        string actionname = (String)row.Cells["ActionName"].Value;
+                        ButtplACTEvent thisEv = new ButtplACTEvent(intensities, duration, victim, attacker, actionname, "", true);
+                        KnownButtplACTEvents.Add(thisEv);
+                    }
+                    catch (FormatException fe)
+                    {
+                        // FIXME: do actual error handling lmao
+                        throw fe;
+                    }
+                }
+            }
+        }
+
+        private void SaveConfigButton_Click(object sender, EventArgs e)
+        {
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                FileStream stream;
+                if ((stream = (FileStream)saveFileDialog.OpenFile()) != null)
+                {
+                    PopulateKnownButtplACTEvents();
+                    StringBuilder stringBuilder = new StringBuilder();
+                    foreach (ButtplACTEvent ev in KnownButtplACTEvents)
+                    {
+                        stringBuilder.AppendLine(ev.ToString());
+                    }
+                    byte[] bArray = Encoding.UTF8.GetBytes(stringBuilder.ToString());
+                    stream.Write(bArray, 0, bArray.Length);
+                }
+            }
+        }
+
+        private void LoadConfigButton_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                StreamReader streamReader = new StreamReader(openFileDialog.FileName);
+                string line;
+                while (null != (line = streamReader.ReadLine()))
+                {
+                    uint duration = 0;
+                    string actionname = "";
+                    string victim = "";
+                    string attacker = "";
+                    double[] intensities = new double[1];
+                    //"duration: " + Duration + "\tactionname: " + ActionName + "\tvictim: " + Victim + "\tattacker: " + Attacker + "\tintensities: " + Intensities[0];
+                    foreach (String elem in line.Split('\t'))
+                    {
+                        string[] cur = elem.Split(':');
+                        switch (cur[0])
+                        {
+                            case "duration": duration = uint.Parse(cur[1]); break;
+                            case "actionname": actionname = cur[1].Trim(); break;
+                            case "victim": victim = cur[1].Trim(); break;
+                            case "attacker": attacker = cur[1].Trim(); break;
+                            case "intensities": intensities[0] = double.Parse(cur[1]); break;
+                        }
+                    }
+                    KnownButtplACTEvents.Add(new ButtplACTEvent(intensities, duration, victim, attacker, actionname, "", true));
+                }
+                // do a warning pop-up with y/n
+                if (true) // warning pop-up "yes"
+                {
+                    EventDataGrid.Rows.Clear();
+                    foreach (ButtplACTEvent ev in KnownButtplACTEvents)
+                    {
+                        DataGridViewRow row = EventDataGrid.Rows[EventDataGrid.Rows.Add()];
+                        row.Cells["Duration"].Value = ev.Duration;
+                        row.Cells["ActionName"].Value = ev.ActionName;
+                        row.Cells["Victim"].Value = ev.Victim;
+                        row.Cells["Intensity"].Value = ev.Intensities[0] * 100; // proooobably stop this eventually huh
+                        row.Cells["Attacker"].Value = ev.Attacker;
+                    }
+                }
             }
         }
     }
