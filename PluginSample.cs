@@ -180,10 +180,12 @@ namespace ButtplACT
             // 
             // BaseVibrationIntensity
             // 
-            this.BaseVibrationIntensity.Location = new System.Drawing.Point(126, 293);
+            this.BaseVibrationIntensity.Location = new System.Drawing.Point(126, 294);
             this.BaseVibrationIntensity.Name = "BaseVibrationIntensity";
-            this.BaseVibrationIntensity.Size = new System.Drawing.Size(100, 20);
+            this.BaseVibrationIntensity.Size = new System.Drawing.Size(43, 20);
             this.BaseVibrationIntensity.TabIndex = 17;
+            this.BaseVibrationIntensity.Text = "0";
+            this.BaseVibrationIntensity.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // saveFileDialog
             // 
@@ -231,6 +233,7 @@ namespace ButtplACT
         private SaveFileDialog saveFileDialog;
         private OpenFileDialog openFileDialog;
         private ButtplugClient bpcl;
+        private ButtplugEmbeddedConnector bpsv;
 
         #endregion
         public PluginSample()
@@ -331,7 +334,8 @@ namespace ButtplACT
             ActGlobals.oFormActMain.OnCombatStart += new CombatToggleEventDelegate(OFormActMain_OnCombatStartAsync);
             ActGlobals.oFormActMain.OnCombatEnd += new CombatToggleEventDelegate(OFormActMain_OnCombatEnd);
 
-            this.bpcl = new ButtplugClient("Embedded ACT Plugin Buttplug Client", new ButtplugEmbeddedConnector("Embedded ACT Plugin Buttplug Server"));
+            this.bpsv = new ButtplugEmbeddedConnector("Embedded ACT Plugin Buttplug Server");
+            this.bpcl = new ButtplugClient("Embedded ACT Plugin Buttplug Client", bpsv);
 
             // Do I *need* to do async stuff here? lmao
             bpcl.ConnectAsync();
@@ -533,22 +537,18 @@ namespace ButtplACT
         {
             async Task StartScanning()
             {
-                deviceListBox.Items.Clear();
                 void Bpcl_DeviceAdded(object senderdev, DeviceAddedEventArgs edev)
                 {
-                    deviceListBox.Items.Add(edev.Device.Name);
+                    // XXX: super fucky stuff here, please repair
+                    deviceListBox.Items.Add(edev.Device.Name + "\t" + edev.Device.Index);
                 }
                 bpcl.DeviceAdded += Bpcl_DeviceAdded;
                 await bpcl.StartScanningAsync();
             }
-            async Task StopScanning()
-            {
-                await bpcl.StopScanningAsync();
-            }
 
             if (scanning)
             {
-                await StopScanning();
+                await bpcl.StopScanningAsync();
                 scanning = !scanning;
                 ScanButton.Text = "Scan for devices";
                 vibeState.Running = true;
@@ -557,7 +557,6 @@ namespace ButtplACT
             {
                 vibeState.Running = false;
                 await Task.Delay(100);
-                enabledDevices.Clear();
                 await StartScanning();
                 scanning = !scanning;
                 ScanButton.Text = "Stop scanning";
