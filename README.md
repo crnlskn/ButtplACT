@@ -2,7 +2,7 @@
 
 Software and hardware, interacting in marvelous ways.
 
-There's video games, one of which is Final Fantasy XIV (FFXIV). As is usual with MMOs, there is software to measure your performance in fights, for FFXIV this is Advanced Combat Tracker (ACT). ACT supports plugins and is written in C#, as is the wunderful Buttplug library - an open source, BSD-licensed implementation of an open sex toy control protocol.
+There's video games, one of which is Final Fantasy XIV (FFXIV). As is usual with MMOs, there is software to measure your performance in fights, for FFXIV this is [Advanced Combat Tracker (ACT)](https://advancedcombattracker.com). ACT supports plugins and is written in C#, as is the wunderful [Buttplug](https://buttplug.io) library - an open source, BSD-licensed implementation of an open sex toy control protocol.
 
 There's also me, who got bored-slash-inspired, and plugged (ehehehe plugged get it) those things together.
 
