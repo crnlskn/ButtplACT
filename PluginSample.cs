@@ -20,7 +20,7 @@ using Timer = System.Threading.Timer;
 
 [assembly: AssemblyTitle("ButtplACT")]
 [assembly: AssemblyDescription("Minimalistic plugin interfacing with buttplug.io to make stuff vibrate when someone gets hit")]
-[assembly: AssemblyVersion("0.0.1")]
+[assembly: AssemblyVersion("0.1.1")]
 
 namespace ButtplACT
 {
@@ -315,7 +315,7 @@ namespace ButtplACT
             {
                 enabledDevices.Add(bpcl.Devices[e.Index]);
             }
-            vibeState.Devices = enabledDevices.ToArray();
+            vibeState.Devices = enabledDevices;
         }
 
         Label lblStatus;    // The status label that appears in ACT's Plugin tab
@@ -339,7 +339,7 @@ namespace ButtplACT
 
             // Do I *need* to do async stuff here? lmao
             bpcl.ConnectAsync();
-            vibeState = new VibeState(false, 0.0, "ambient", null);
+            vibeState = new VibeState(false, 0.0, "ambient", new List<ButtplugClientDevice>());
             lblStatus.Text = "Plugin Started";
         }
 
@@ -348,9 +348,9 @@ namespace ButtplACT
             public bool Running { get; set; }
             public double Intensity { get; set; }
             public string Cause { get; set; }
-            public ButtplugClientDevice[] Devices { get; set; }
+            public List<ButtplugClientDevice> Devices { get; set; }
 
-            public VibeState(bool running, double intensity, string cause, ButtplugClientDevice[] devices)
+            public VibeState(bool running, double intensity, string cause, List<ButtplugClientDevice> devices)
             {
                 Running = running;
                 Intensity = intensity;
@@ -489,7 +489,7 @@ namespace ButtplACT
                 c => (c.Victim.Equals("") || c.Victim.Equals(actionInfo.victim))
                     && (c.Attacker.Equals("") || c.Attacker.Equals(actionInfo.attacker)
                     && (c.ActionName.Equals("") || c.ActionName.Equals(actionInfo.theAttackType))));
-
+            System.Diagnostics.Debug.WriteLine("action name: " + actionInfo.theAttackType);
             foreach (ButtplACTEvent ev in evs)
             {
                 ButtplACTEvent actualEvent = (ButtplACTEvent)ev.Clone();
@@ -654,36 +654,39 @@ namespace ButtplACT
 
         private void LoadConfigButton_Click(object sender, EventArgs e)
         {
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            var ConfirmResult = MessageBox.Show("Loading a config will delete the currently entered events.\n\nProceed?",
+               "Confirm loading", MessageBoxButtons.YesNo);
+            if (ConfirmResult == DialogResult.Yes)
             {
-                StreamReader streamReader = new StreamReader(openFileDialog.FileName);
-                string line;
-                while (null != (line = streamReader.ReadLine()))
-                {
-                    uint duration = 0;
-                    string actionname = "";
-                    string victim = "";
-                    string attacker = "";
-                    double[] intensities = new double[1];
-                    //"duration: " + Duration + "\tactionname: " + ActionName + "\tvictim: " + Victim + "\tattacker: " + Attacker + "\tintensities: " + Intensities[0];
-                    foreach (String elem in line.Split('\t'))
-                    {
-                        string[] cur = elem.Split(':');
-                        switch (cur[0])
-                        {
-                            case "duration": duration = uint.Parse(cur[1]); break;
-                            case "actionname": actionname = cur[1].Trim(); break;
-                            case "victim": victim = cur[1].Trim(); break;
-                            case "attacker": attacker = cur[1].Trim(); break;
-                            case "intensities": intensities[0] = double.Parse(cur[1]); break;
-                        }
-                    }
-                    KnownButtplACTEvents.Add(new ButtplACTEvent(intensities, duration, victim, attacker, actionname, "", true));
-                }
-                // do a warning pop-up with y/n
-                if (true) // warning pop-up "yes"
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     EventDataGrid.Rows.Clear();
+                    KnownButtplACTEvents.Clear();
+                    StreamReader streamReader = new StreamReader(openFileDialog.FileName);
+                    string line;
+                    while (null != (line = streamReader.ReadLine()))
+                    {
+                        uint duration = 0;
+                        string actionname = "";
+                        string victim = "";
+                        string attacker = "";
+                        double[] intensities = new double[1];
+                        //"duration: " + Duration + "\tactionname: " + ActionName + "\tvictim: " + Victim + "\tattacker: " + Attacker + "\tintensities: " + Intensities[0];
+                        foreach (String elem in line.Split('\t'))
+                        {
+                            string[] cur = elem.Split(':');
+                            switch (cur[0])
+                            {
+                                case "duration": duration = uint.Parse(cur[1]); break;
+                                case "actionname": actionname = cur[1].Trim(); break;
+                                case "victim": victim = cur[1].Trim(); break;
+                                case "attacker": attacker = cur[1].Trim(); break;
+                                case "intensities": intensities[0] = double.Parse(cur[1]); break;
+                            }
+                        }
+                        KnownButtplACTEvents.Add(new ButtplACTEvent(intensities, duration, victim, attacker, actionname, "", true));
+                    }
+
                     foreach (ButtplACTEvent ev in KnownButtplACTEvents)
                     {
                         DataGridViewRow row = EventDataGrid.Rows[EventDataGrid.Rows.Add()];

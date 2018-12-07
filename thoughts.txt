@@ -57,3 +57,5 @@ design interna:
       e.g. "when rampart, increase vibration *by* 10%" or "when hallowed
       ground, don't vibrate at all," or "when fight or flight, vibrate at 20%
       for 15 seconds then increase to 60% over the rest of the buff duration"
+
+  bigish TODO: rethink device listing/enabling/event-to-capabilities-mapping
