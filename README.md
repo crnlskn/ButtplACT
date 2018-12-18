@@ -20,9 +20,27 @@ Building it yourself should be straight-forward, just get the dependencies with 
 
 There will eventually be a guide for what to download from where in a bit more detail, and I hope I don't have to write that myself, but for now this here is what you get.
 
-Configuration happens via six elements on the `ButtplACT.dll` tab, the text box next to the `Target` label identifies the target that is to be observed by the plugin. Due to how ACT works, if you want your vibrator to react to your own character being hit, you need to enter `YOU`, for any other character it needs to be the full, exact name.
+Configurable events consist of an `action name`, an `attacker`, a `victim`, and an `intensity`. The only necessary entries are `duration` and `intensity`, the former in seconds with one significant digit after the period, e.g. `0.2` for 0.2 seconds or 200 milliseconds. The `action name` is the name of the action as in-game, e.g. `Rage of Halone` or `Regen`. The `victim` and `attacker` strings are the in-game name of a PC or NPC, or `YOU` as special string for the character of the player on the computer where the plugin is running. As an example, if someone where to want to en-/discourage their paladin tank from healing, one could configure the following event, which vibrates at 80% whenever the PC casts clemency:
 
-The text box next to the `Base intensity` label configures the base intensity of vibration during combat, in percent (i.e. 0 to 100), whereas the text next to the `Impact intensity` label configures the impact intensity. Base intensity is to be understood as the intensity of vibration caused purely by being in combat, impact intensity is to be understood as the intensity of vibration when the configured target is the target of any combat action. Basically, base intensity is background vibration just because you're fighting, and impact intensity is a different level of vibration because you got hit.
+```
+Action name: Clemency
+Attacker: YOU
+Victim:
+Duration: 2
+Intensity: 80
+```
+
+Additionally the only way to currently react to DoT or HoT ticks is by exploiting the fact that ACT reports them as estimates and adds `(*)` to the action name. Thus an event that vibrates at 30% for 300ms whenever regen ticks would be as follows:
+
+```
+Action name: Regen(*)
+Attacker: 
+Victim:
+Duration: 0.3
+Intensity: 30
+```
+
+A more thorough guide will be released eventually.
 
 The `Scan for devices` button scans for devices. Although Buttplug supports *a lot* of devices as well as different means of connecting them, ButtplACT currently only supports bluetooth vibrators. Do not pair your device with your computer or phone or anything else, just turn it on and click the button. A few seconds later the device will show up in the list next to the button, where you can select it. The device should vibrate at 50% for a short moment when you check the checkbox next to its name.
 
