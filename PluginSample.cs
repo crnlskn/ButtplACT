@@ -1,26 +1,19 @@
 ﻿using Advanced_Combat_Tracker;
 using Buttplug.Client;
-using Buttplug.Core;
-using Buttplug.Core.Messages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Serialization;
 using Timer = System.Threading.Timer;
 
 [assembly: AssemblyTitle("ButtplACT")]
-[assembly: AssemblyDescription("Minimalistic plugin interfacing with buttplug.io to make stuff vibrate when someone gets hit")]
-[assembly: AssemblyVersion("0.1.1")]
+[assembly: AssemblyDescription("Plugin interfacing with buttplug.io to make stuff vibrate when things happen")]
+[assembly: AssemblyVersion("0.1.2")]
 
 namespace ButtplACT
 {
@@ -399,7 +392,7 @@ namespace ButtplACT
                             futureEvents[evTruncTicks].Intensity > 1 ?
                                 1 : futureEvents[evTruncTicks].Intensity;
                     }
-                    if (ev.Duration > 100)
+                    if (ev.Duration >= 200)
                     {
                         VibeState state = futureEvents[evTruncTicks];
                         for (int i = 0; i < ev.Duration / 100; ++i)
@@ -608,40 +601,40 @@ namespace ButtplACT
                 {
                     break;
                 }
-                if (row.Cells["EnabledCheckbox"].Value.Equals("true"))
+                try
                 {
-                    try
-                    {
-                        double[] intensities = new double[1];
-                        intensities[0] = Double.Parse((String)row.Cells["Intensity"].Value);
-                        intensities[0] = intensities[0] < 0 ? 0 :
-                            intensities[0] > 100 ? 100 : intensities[0];
-                        intensities[0] /= 100;
-                        uint duration = UInt32.Parse((String)row.Cells["Duration"].Value);
-                        string attacker = (String)row.Cells["Attacker"].Value;
-                        string victim = (String)row.Cells["Victim"].Value;
-                        string actionname = (String)row.Cells["ActionName"].Value;
-                        ButtplACTEvent thisEv = new ButtplACTEvent(intensities, duration, victim, attacker, actionname, "", true);
-                        KnownButtplACTEvents.Add(thisEv);
-                    }
-                    catch (FormatException fe)
-                    {
-                        // FIXME: do actual error handling lmao
-                        throw fe;
-                    }
+                    double[] intensities = new double[1];
+                    intensities[0] = Double.Parse(row.Cells["Intensity"].Value.ToString());
+                    intensities[0] = intensities[0] < 0 ? 0 :
+                        intensities[0] > 100 ? 100 : intensities[0];
+                    intensities[0] /= 100;
+                    uint duration = (uint)(Double.Parse((String)row.Cells["Duration"].Value) * 1000);
+                    string attacker = (String)row.Cells["Attacker"].Value;
+                    string victim = (String)row.Cells["Victim"].Value;
+                    string actionname = (String)row.Cells["ActionName"].Value;
+                    ButtplACTEvent thisEv = new ButtplACTEvent(intensities, duration, victim, attacker, actionname, "", true);
+                    KnownButtplACTEvents.Add(thisEv);
+                }
+                catch (FormatException fe)
+                {
+                    // FIXME: do actual error handling lmao
+                    throw fe;
                 }
             }
         }
 
         private void SaveConfigButton_Click(object sender, EventArgs e)
         {
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            var ConfirmResult = MessageBox.Show("Saving will only save the currently enabled events.\n\nProceed?",
+                "Confirm saving", MessageBoxButtons.YesNo);
+            if (ConfirmResult == DialogResult.Yes && saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 FileStream stream;
                 if ((stream = (FileStream)saveFileDialog.OpenFile()) != null)
                 {
                     PopulateKnownButtplACTEvents();
                     StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.AppendLine(String.Format("base: {0}", BaseVibrationIntensity.Text));
                     foreach (ButtplACTEvent ev in KnownButtplACTEvents)
                     {
                         stringBuilder.AppendLine(ev.ToString());
@@ -664,14 +657,20 @@ namespace ButtplACT
                     KnownButtplACTEvents.Clear();
                     StreamReader streamReader = new StreamReader(openFileDialog.FileName);
                     string line;
+                    bool first = true;
                     while (null != (line = streamReader.ReadLine()))
                     {
+                        if (first)
+                        {
+                            BaseVibrationIntensity.Text = line.Split(':')[1].Trim();
+                            first = false;
+                            continue;
+                        }
                         uint duration = 0;
                         string actionname = "";
                         string victim = "";
                         string attacker = "";
                         double[] intensities = new double[1];
-                        //"duration: " + Duration + "\tactionname: " + ActionName + "\tvictim: " + Victim + "\tattacker: " + Attacker + "\tintensities: " + Intensities[0];
                         foreach (String elem in line.Split('\t'))
                         {
                             string[] cur = elem.Split(':');
@@ -690,11 +689,12 @@ namespace ButtplACT
                     foreach (ButtplACTEvent ev in KnownButtplACTEvents)
                     {
                         DataGridViewRow row = EventDataGrid.Rows[EventDataGrid.Rows.Add()];
-                        row.Cells["Duration"].Value = ev.Duration;
+                        row.Cells["Duration"].Value = String.Format("{0:N1}", ev.Duration / 1000.0);
                         row.Cells["ActionName"].Value = ev.ActionName;
                         row.Cells["Victim"].Value = ev.Victim;
                         row.Cells["Intensity"].Value = ev.Intensities[0] * 100; // proooobably stop this eventually huh
                         row.Cells["Attacker"].Value = ev.Attacker;
+                        row.Cells["EnabledCheckbox"].Value = true;
                     }
                 }
             }
