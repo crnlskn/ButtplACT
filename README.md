@@ -16,8 +16,6 @@ Download a release, unblock the contained dlls, extract them into your ACT folde
 
 Building it yourself should be straight-forward, just get the dependencies with nuget (assuming I configured that right, if not open an issue to make me aware that I didn't) and, well, build the only project in the solution. Or get a programmer friend of yours to do it, maybe.
 
-There will eventually be a guide for what to download from where in a bit more detail, and I hope I don't have to write that myself, but for now this here is what you get.
-
 Configurable events consist of an `action name`, an `attacker`, a `victim`, and an `intensity`. The only necessary entries are `duration` and `intensity`, the former in seconds with one significant digit after the period, e.g. `0.2` for 0.2 seconds or 200 milliseconds. The `action name` is the name of the action as in-game, e.g. `Rage of Halone` or `Regen`. The `victim` and `attacker` strings are the in-game name of a PC or NPC, or `YOU` as special string for the character of the player on the computer where the plugin is running. As an example, if someone where to want to en-/discourage their paladin tank from healing, one could configure the following event, which vibrates at 80% whenever the PC casts clemency:
 
 ```
