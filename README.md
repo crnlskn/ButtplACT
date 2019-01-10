@@ -14,8 +14,6 @@ No comment.
 
 Download a release, unblock the contained dlls, extract them into your ACT folder, load the plugin, configure the plugin, click `Ready!`
 
-Well, not quite, there'll probably a hunt for DLLs involved because I cannot package all the dependencies into a .zip file for release because I do not want to read all the licenses and understand them and all that. Well, for now at least.
-
 Building it yourself should be straight-forward, just get the dependencies with nuget (assuming I configured that right, if not open an issue to make me aware that I didn't) and, well, build the only project in the solution. Or get a programmer friend of yours to do it, maybe.
 
 There will eventually be a guide for what to download from where in a bit more detail, and I hope I don't have to write that myself, but for now this here is what you get.
