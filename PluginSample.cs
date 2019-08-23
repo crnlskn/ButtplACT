@@ -13,7 +13,7 @@ using Timer = System.Threading.Timer;
 
 [assembly: AssemblyTitle("ButtplACT")]
 [assembly: AssemblyDescription("Plugin interfacing with buttplug.io to make stuff vibrate when things happen")]
-[assembly: AssemblyVersion("0.1.2")]
+[assembly: AssemblyVersion(version: "0.1.2")]
 
 namespace ButtplACT
 {
@@ -39,8 +39,40 @@ namespace ButtplACT
             base.Dispose(disposing);
         }
 
-        #region Component Designer generated code
+        private uint ticksToMillis(uint ticks)
+        {
+            // ticks are 100ns, to millis is thus div 10_000
+            return ticks / 10_000;
+        }
+        private double ticksToSeconds(uint ticks)
+        {
+            // ticks are 100ns, to seconds is thus div 10_000_000
+            return ticks / 10_000_000f;
+        }
+        private uint secondsToTicks(double seconds)
+        {
+            // ticks are 100ns, from seconds is thus mult 10_000_000
+            // but we might have ieee754-related garbage there so trunc it I guess?
+            return (uint)(Math.Round(seconds * 10) * 1_000_000);
+        }
+        private uint millisToTicks(uint millis)
+        {
+            // ticks are 100ns, from millis is mult 10_000
+            return millis * 10_000;
+        }
+        private double millisToSeconds(uint millis)
+        {
+            // just div 1000, "milli" is an SI prefix
+            return millis / 1000f;
+        }
+        private uint secondsToMillis(double seconds)
+        {
+            // times 10 for the resolution we want, round, then times 100
+            return (uint) (Math.Round(seconds * 10) * 100);
+        }
 
+
+        #region Component Designer generated code
         /// <summary> 
         /// Required method for Designer support - do not modify 
         /// the contents of this method with the code editor.
@@ -395,9 +427,10 @@ namespace ButtplACT
                     if (ev.Duration >= 200)
                     {
                         VibeState state = futureEvents[evTruncTicks];
-                        for (int i = 0; i < ev.Duration / 100; ++i)
+                        // step in 100ms increments
+                        for (uint i = 0; i <= ev.Duration; i += 100)
                         {
-                            long iterTicks = evTruncTicks + i * 1000000;
+                            long iterTicks = evTruncTicks + millisToTicks(i);
                             if (!futureEvents.ContainsKey(iterTicks) || null == futureEvents[iterTicks])
                             {
                                 futureEvents[iterTicks] = (VibeState)vibeState.Clone();
@@ -415,7 +448,7 @@ namespace ButtplACT
                                 }
                             }
                         }
-                        long eventEndTicks = evTruncTicks + (ev.Duration - 100) * 10000;
+                        long eventEndTicks = evTruncTicks + millisToTicks(ev.Duration);
                         futureEvents[eventEndTicks].Cause += " -" + ev.ActionName;
                     }
                 }
@@ -594,6 +627,7 @@ namespace ButtplACT
 
         private void PopulateKnownButtplACTEvents()
         {
+            KnownButtplACTEvents = new List<ButtplACTEvent>();
             foreach (DataGridViewRow row in EventDataGrid.Rows)
             {
                 // XXX: this is stupid and I hate it
@@ -608,7 +642,7 @@ namespace ButtplACT
                     intensities[0] = intensities[0] < 0 ? 0 :
                         intensities[0] > 100 ? 100 : intensities[0];
                     intensities[0] /= 100;
-                    uint duration = (uint)(Double.Parse((String)row.Cells["Duration"].Value) * 1000);
+                    uint duration = secondsToMillis(Double.Parse((String)row.Cells["Duration"].Value));
                     string attacker = (String)row.Cells["Attacker"].Value;
                     string victim = (String)row.Cells["Victim"].Value;
                     string actionname = (String)row.Cells["ActionName"].Value;
@@ -689,7 +723,7 @@ namespace ButtplACT
                     foreach (ButtplACTEvent ev in KnownButtplACTEvents)
                     {
                         DataGridViewRow row = EventDataGrid.Rows[EventDataGrid.Rows.Add()];
-                        row.Cells["Duration"].Value = String.Format("{0:N1}", ev.Duration / 1000.0);
+                        row.Cells["Duration"].Value = String.Format("{0:N1}", millisToSeconds(ev.Duration));
                         row.Cells["ActionName"].Value = ev.ActionName;
                         row.Cells["Victim"].Value = ev.Victim;
                         row.Cells["Intensity"].Value = ev.Intensities[0] * 100; // proooobably stop this eventually huh
