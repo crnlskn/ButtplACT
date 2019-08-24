@@ -331,14 +331,21 @@ namespace ButtplACT
 
         private async void DeviceListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            // XXX: also allow users to disable a device...
+            // do a quick bzz to note which device this actually is
             await bpcl.Devices[e.Index].SendVibrateCmd(.5);
             await Task.Delay(300);
             await bpcl.Devices[e.Index].SendVibrateCmd(0);
 
             lock (enabledDevices)
             {
-                enabledDevices.Add(bpcl.Devices[e.Index]);
+                if (e.NewValue.Equals("Checked"))
+                {
+                    enabledDevices.Add(bpcl.Devices[e.Index]);
+                }
+                else
+                {
+                    enabledDevices.Remove(bpcl.Devices[e.Index]);
+                }
             }
             vibeState.Devices = enabledDevices;
         }
@@ -361,6 +368,9 @@ namespace ButtplACT
 
             this.bpsv = new ButtplugEmbeddedConnector("Embedded ACT Plugin Buttplug Server");
             this.bpcl = new ButtplugClient("Embedded ACT Plugin Buttplug Client", bpsv);
+
+            // TODO: bpcl.DeviceRemove += MethodThatDoesThatCleanly
+            //       ykno with all that warning and removing it from the list and whatnot
 
             // Do I *need* to do async stuff here? lmao
             bpcl.ConnectAsync();
