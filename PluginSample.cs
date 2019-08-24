@@ -338,7 +338,7 @@ namespace ButtplACT
 
             lock (enabledDevices)
             {
-                if (e.NewValue.Equals("Checked"))
+                if (e.NewValue.Equals(CheckState.Checked))
                 {
                     enabledDevices.Add(bpcl.Devices[e.Index]);
                 }
