@@ -13,7 +13,7 @@ using Timer = System.Threading.Timer;
 
 [assembly: AssemblyTitle("ButtplACT")]
 [assembly: AssemblyDescription("Plugin interfacing with buttplug.io to make stuff vibrate when things happen")]
-[assembly: AssemblyVersion(version: "0.1.2")]
+[assembly: AssemblyVersion(version: "0.1.3")]
 
 namespace ButtplACT
 {
