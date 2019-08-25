@@ -369,8 +369,21 @@ namespace ButtplACT
             this.bpsv = new ButtplugEmbeddedConnector("Embedded ACT Plugin Buttplug Server");
             this.bpcl = new ButtplugClient("Embedded ACT Plugin Buttplug Client", bpsv);
 
-            // TODO: bpcl.DeviceRemove += MethodThatDoesThatCleanly
-            //       ykno with all that warning and removing it from the list and whatnot
+            void Bpcl_DeviceRemoved(object aObj, DeviceRemovedEventArgs aArgs)
+            {
+                // ???
+                deviceListBox.Items.Remove(aArgs.Device.Name + "\t" + aArgs.Device.Index);
+                enabledDevices.Remove(aArgs.Device);
+            }
+
+            bpcl.DeviceRemoved += Bpcl_DeviceRemoved;
+
+            void Bpcl_DeviceAdded(object senderdev, DeviceAddedEventArgs edev)
+            {
+                // XXX: super fucky stuff here, please repair
+                deviceListBox.Items.Add(edev.Device.Name + "\t" + edev.Device.Index);
+            }
+            bpcl.DeviceAdded += Bpcl_DeviceAdded;
 
             // Do I *need* to do async stuff here? lmao
             bpcl.ConnectAsync();
@@ -573,12 +586,6 @@ namespace ButtplACT
         {
             async Task StartScanning()
             {
-                void Bpcl_DeviceAdded(object senderdev, DeviceAddedEventArgs edev)
-                {
-                    // XXX: super fucky stuff here, please repair
-                    deviceListBox.Items.Add(edev.Device.Name + "\t" + edev.Device.Index);
-                }
-                bpcl.DeviceAdded += Bpcl_DeviceAdded;
                 await bpcl.StartScanningAsync();
             }
 
