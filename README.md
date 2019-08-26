@@ -41,3 +41,7 @@ A more thorough guide will be released eventually.
 The `Scan for devices` button scans for devices. Although Buttplug supports *a lot* of devices as well as different means of connecting them, ButtplACT currently only supports bluetooth vibrators. Do not pair your device with your computer or phone or anything else, just turn it on and click the button. A few seconds later the device will show up in the list next to the button, where you can select it. The device should vibrate at 50% for a short moment when you check the checkbox next to its name.
 
 After all of this is configured you can click the `Ready!` button. This will grey out all the elements and change the `Ready!` text into `Stop` and you're good to go.
+
+# WHO
+
+Me. crnlskn or crnl or noelsken, usually. Bug me on [twitter](https://twitter.com/noelsken) if something seems weird or broken (as long as you don't ask questions that are answered in this README already, please), or give me money on [ko-fi](https://ko-fi.com/crnlskn) to fund further development, like for example electro-stimulation support.
