@@ -95,6 +95,7 @@ namespace ButtplACT
             this.BaseVibrationIntensity = new System.Windows.Forms.TextBox();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.EventDataGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -176,9 +177,9 @@ namespace ButtplACT
             // 
             // SaveConfigButton
             // 
-            this.SaveConfigButton.Location = new System.Drawing.Point(452, 293);
+            this.SaveConfigButton.Location = new System.Drawing.Point(491, 293);
             this.SaveConfigButton.Name = "SaveConfigButton";
-            this.SaveConfigButton.Size = new System.Drawing.Size(97, 24);
+            this.SaveConfigButton.Size = new System.Drawing.Size(75, 24);
             this.SaveConfigButton.TabIndex = 14;
             this.SaveConfigButton.Text = "Save config";
             this.SaveConfigButton.UseVisualStyleBackColor = true;
@@ -186,9 +187,9 @@ namespace ButtplACT
             // 
             // LoadConfigButton
             // 
-            this.LoadConfigButton.Location = new System.Drawing.Point(555, 294);
+            this.LoadConfigButton.Location = new System.Drawing.Point(572, 294);
             this.LoadConfigButton.Name = "LoadConfigButton";
-            this.LoadConfigButton.Size = new System.Drawing.Size(97, 23);
+            this.LoadConfigButton.Size = new System.Drawing.Size(80, 23);
             this.LoadConfigButton.TabIndex = 15;
             this.LoadConfigButton.Text = "Load config";
             this.LoadConfigButton.UseVisualStyleBackColor = true;
@@ -220,10 +221,22 @@ namespace ButtplACT
             // 
             this.openFileDialog.FileName = "openFileDialog";
             // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(572, 323);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(80, 17);
+            this.checkBox1.TabIndex = 18;
+            this.checkBox1.Text = "Hide config";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckStateChanged += new System.EventHandler(this.checkBox1_CheckStateChanged);
+            // 
             // PluginSample
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.BaseVibrationIntensity);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.LoadConfigButton);
@@ -233,7 +246,7 @@ namespace ButtplACT
             this.Controls.Add(this.deviceListBox);
             this.Controls.Add(this.ScanButton);
             this.Name = "PluginSample";
-            this.Size = new System.Drawing.Size(914, 330);
+            this.Size = new System.Drawing.Size(914, 355);
             ((System.ComponentModel.ISupportInitialize)(this.EventDataGrid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -258,6 +271,7 @@ namespace ButtplACT
         private SaveFileDialog saveFileDialog;
         private OpenFileDialog openFileDialog;
         private ButtplugClient bpcl;
+        private CheckBox checkBox1;
         private ButtplugEmbeddedConnector bpsv;
 
         #endregion
@@ -748,6 +762,18 @@ namespace ButtplACT
                         row.Cells["EnabledCheckbox"].Value = true;
                     }
                 }
+            }
+        }
+
+        private void checkBox1_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                EventDataGrid.Visible = false;
+            }
+            else
+            {
+                EventDataGrid.Visible = true;
             }
         }
     }
