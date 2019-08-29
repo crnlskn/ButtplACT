@@ -13,7 +13,7 @@ using Timer = System.Threading.Timer;
 
 [assembly: AssemblyTitle("ButtplACT")]
 [assembly: AssemblyDescription("Plugin interfacing with buttplug.io to make stuff vibrate when things happen")]
-[assembly: AssemblyVersion(version: "0.1.3")]
+[assembly: AssemblyVersion(version: "0.1.4")]
 
 namespace ButtplACT
 {
@@ -96,6 +96,8 @@ namespace ButtplACT
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.EventDataGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -232,10 +234,29 @@ namespace ButtplACT
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckStateChanged += new System.EventHandler(this.checkBox1_CheckStateChanged);
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(126, 320);
+            this.progressBar1.MarqueeAnimationSpeed = 1;
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(341, 23);
+            this.progressBar1.TabIndex = 19;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(8, 323);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(82, 13);
+            this.label2.TabIndex = 20;
+            this.label2.Text = "Current intensity";
+            // 
             // PluginSample
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.BaseVibrationIntensity);
             this.Controls.Add(this.label1);
@@ -272,6 +293,8 @@ namespace ButtplACT
         private OpenFileDialog openFileDialog;
         private ButtplugClient bpcl;
         private CheckBox checkBox1;
+        private ProgressBar progressBar1;
+        private Label label2;
         private ButtplugEmbeddedConnector bpsv;
 
         #endregion
@@ -399,6 +422,9 @@ namespace ButtplACT
             }
             bpcl.DeviceAdded += Bpcl_DeviceAdded;
 
+            progressBar1.Minimum = 0;
+            progressBar1.Maximum = 100;
+
             // Do I *need* to do async stuff here? lmao
             bpcl.ConnectAsync();
             vibeState = new VibeState(false, 0.0, "ambient", new List<ButtplugClientDevice>());
@@ -517,6 +543,7 @@ namespace ButtplACT
                 {
                     System.Diagnostics.Debug.WriteLine("at " + DateTime.Now.Ticks + " actually sending vibes: " + curVibeState.ToString());
                     await device.SendVibrateCmd(curVibeState.Intensity);
+                    progressBar1.Value = (int) (curVibeState.Intensity * 100);
                 }
                 ((IEnumerator<VibeState>)vibeStateEnumerator).MoveNext();
             }
