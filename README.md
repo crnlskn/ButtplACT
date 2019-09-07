@@ -1,3 +1,7 @@
+# UPDATE
+
+This is probably retired as research by now, I am neither willing nor able to reimplement an event handling queue as comprehensively as Triggernometry already does, so I forked that instead: https://github.com/crnlskn/Triggernometry
+
 # WHAT
 
 Software and hardware, interacting in marvelous ways.
