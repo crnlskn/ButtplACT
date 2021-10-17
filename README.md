@@ -2,6 +2,8 @@
 
 This is probably retired as research by now, I am neither willing nor able to reimplement an event handling queue as comprehensively as Triggernometry already does, so I forked that instead: https://github.com/crnlskn/Triggernometry
 
+As of Oct 2021 I have started working on something new that fills (ehehe) a similar niche, but there seems to be a tendency of burnout in sexy ffxiv plugin developers...
+
 # WHAT
 
 Software and hardware, interacting in marvelous ways.
